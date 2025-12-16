@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Tra Cứu Chứng Nhận</title>
+    <style>
+        /* 1. PHẦN TRANG TRÍ (CSS) - Làm đẹp giao diện */
+        :root {
+            --primary-color: #0056b3; /* Màu xanh chủ đạo */
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 50px;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Ô tìm kiếm */
+        .search-box {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #004494;
+        }
+
+        /* Khu vực kết quả */
+        #result-area {
+            margin-top: 25px;
+        }
+
+        .cert-card {
+            background: var(--card-bg);
+            border-left: 5px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .cert-info h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .cert-info p {
+            margin: 5px 0;
+            color: #555;
+            font-size: 15px;
+        }
+
+        .btn-download {
+            display: inline-block;
+            margin-top: 15px;
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: bold;
+            border: 1px solid var(--primary-color);
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .btn-download:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .error-msg {
+            text-align: center;
+            color: #dc3545;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Mobile */
+        @media (max-width: 480px) {
+            .search-box {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Tra Cứu Chứng Nhận</h1>
+            <p>Nhập Mã số hoặc Họ tên học viên để tìm kiếm</p>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Ví dụ: TEST01 hoặc Nguyễn Văn A...">
+            <button onclick="handleSearch()">Tra cứu</button>
+        </div>
+
+        <div id="result-area">
+            </div>
+    </div>
+
+    <script>
+        /* 2. DỮ LIỆU GIẢ LẬP (Mô phỏng Database) */
+        const database = [
+            { 
+                id: "TEST01", 
+                name: "Nguyễn Văn A", 
+                course: "Khóa Học SEO Master", 
+                date: "15/12/2025",
+                link: "https://onedrive.live.com/demo-link-1" 
+            },
+            { 
+                id: "TEST02", 
+                name: "Trần Thị B", 
+                course: "Khóa Học Content Marketing", 
+                date: "10/12/2025",
+                link: "https://onedrive.live.com/demo-link-2" 
+            },
+            { 
+                id: "TEST03", 
+                name: "Lê Văn C", 
+                course: "Khóa Học Lập Trình Web", 
+                date: "20/11/2025",
+                link: "https://onedrive.live.com/demo-link-3" 
+            },
+            { 
+                id: "TEST04", 
+                name: "Phạm Thị D", 
+                course: "Khóa Học SEO Master", 
+                date: "05/12/2025",
+                link: "https://onedrive.live.com/demo-link-4" 
+            }
+        ];
+
+        /* 3. LOGIC TÌM KIẾM (Javascript) */
+        function handleSearch() {
+            // Lấy từ khóa và xóa khoảng trắng thừa, chuyển về chữ thường
+            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+            const resultDiv = document.getElementById('result-area');
+            
+            // Reset kết quả cũ
+            resultDiv.innerHTML = '';
+
+            // Kiểm tra nếu ô trống
+            if (keyword === '') {
+                alert('Vui lòng nhập thông tin cần tìm!');
+                return;
+            }
+
+            // Lọc dữ liệu
+            // Logic: Mã số phải khớp 100% HOẶC Tên chứa từ khóa
+            const results = database.filter(student => 
+                student.id.toLowerCase() === keyword || 
+                student.name.toLowerCase().includes(keyword)
+            );
+
+            // Hiển thị kết quả
+            if (results.length > 0) {
+                let htmlContent = `<p style="margin-bottom:15px; color:#666;">Tìm thấy <strong>${results.length}</strong> kết quả:</p>`;
+                
+                results.forEach(item => {
+                    htmlContent += `
+                        <div class="cert-card">
+                            <div class="cert-info">
+                                <h3>${item.name}</h3>
+                                <p><strong>Mã số:</strong> ${item.id}</p>
+                                <p><strong>Khóa học:</strong> ${item.course}</p>
+                                <p><strong>Ngày cấp:</strong> ${item.date}</p>
+                            </div>
+                            <a href="${item.link}" target="_blank" class="btn-download">
+                                📥 Tải Chứng Nhận
+                            </a>
+                        </div>
+                    `;
+                });
+                resultDiv.innerHTML = htmlContent;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error-msg">
+                        ❌ Không tìm thấy dữ liệu nào phù hợp với từ khóa "<strong>${keyword}</strong>".
+                    </div>
+                `;
+            }
+        }
+
+        // Hỗ trợ ấn phím Enter để tìm
+        document.getElementById("searchInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                handleSearch();
+            }
+        });
+    </script>
+
+</body>
+</html>
