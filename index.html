@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ Thống Tra Cứu Chứng Nhận</title>
     <style>
-        /* 1. PHẦN TRANG TRÍ (CSS) - Làm đẹp giao diện */
+        /* 1. PHẦN TRANG TRÍ (CSS) */
         :root {
-            --primary-color: #0056b3; /* Màu xanh chủ đạo */
+            /* ĐÃ ĐỔI MÀU Ở ĐÂY */
+            --primary-color: #961a1b; /* Màu đỏ thương hiệu của bạn */
             --bg-color: #f4f7f6;
             --card-bg: #ffffff;
         }
@@ -35,9 +36,11 @@
         }
 
         .header h1 {
-            color: #333;
-            font-size: 24px;
+            /* Tiêu đề cũng theo màu đỏ chủ đạo */
+            color: var(--primary-color);
+            font-size: 26px;
             margin-bottom: 5px;
+            text-transform: uppercase; /* Viết hoa cho mạnh mẽ */
         }
 
         .header p {
@@ -53,6 +56,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             display: flex;
             gap: 10px;
+            border: 1px solid #eee;
         }
 
         input[type="text"] {
@@ -82,7 +86,8 @@
         }
 
         button:hover {
-            background-color: #004494;
+            /* Làm tối màu đỏ đi một chút khi di chuột vào */
+            background-color: #7a1516; 
         }
 
         /* Khu vực kết quả */
@@ -92,6 +97,7 @@
 
         .cert-card {
             background: var(--card-bg);
+            /* Đường viền bên trái màu đỏ */
             border-left: 5px solid var(--primary-color);
             padding: 20px;
             border-radius: 8px;
@@ -115,12 +121,14 @@
             display: inline-block;
             margin-top: 15px;
             text-decoration: none;
+            /* Chữ nút tải về màu đỏ */
             color: var(--primary-color);
             font-weight: bold;
             border: 1px solid var(--primary-color);
             padding: 8px 15px;
             border-radius: 4px;
             font-size: 14px;
+            transition: all 0.3s;
         }
 
         .btn-download:hover {
@@ -204,27 +212,22 @@
 
         /* 3. LOGIC TÌM KIẾM (Javascript) */
         function handleSearch() {
-            // Lấy từ khóa và xóa khoảng trắng thừa, chuyển về chữ thường
             const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
             const resultDiv = document.getElementById('result-area');
             
-            // Reset kết quả cũ
             resultDiv.innerHTML = '';
 
-            // Kiểm tra nếu ô trống
             if (keyword === '') {
                 alert('Vui lòng nhập thông tin cần tìm!');
                 return;
             }
 
-            // Lọc dữ liệu
-            // Logic: Mã số phải khớp 100% HOẶC Tên chứa từ khóa
+            // Logic tìm kiếm: Mã khớp chính xác HOẶC Tên chứa từ khóa
             const results = database.filter(student => 
                 student.id.toLowerCase() === keyword || 
                 student.name.toLowerCase().includes(keyword)
             );
 
-            // Hiển thị kết quả
             if (results.length > 0) {
                 let htmlContent = `<p style="margin-bottom:15px; color:#666;">Tìm thấy <strong>${results.length}</strong> kết quả:</p>`;
                 
